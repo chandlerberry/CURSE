@@ -143,149 +143,53 @@ class Student(User):
 
     # add courses to student schedule
     # author: Chandler Berry
-    def addCourse(self, studentID, studentEmail):
-
+    def addCourse(self, studentID):
         # prompt user to enter CRN
-        getCRN = input('enter CRN of course you want to add: ')
-
-        # get ID of student adding the course to their schedule
+        getCRN = input('Enter CRN of course you want to add: ')
+        # check if student is already in the class they are trying to add
         c = database.cursor()
-        getStudentID = 'SELECT Student.ID FROM Student WHERE Student.Email = \'' + studentEmail + '\''
-        c.execute(getStudentID)
-        studentResult = list(c.fetchall())
+        checkSchedMapping = 'SELECT StudentID FROM Schedule_Mapping WHERE StudentID = ' + str(studentID) + ' AND CourseID = ' + str(getCRN)
+        c.execute(checkSchedMapping)
+        result = c.fetchone()
         c.close()
-
-        # get initial student schedule
-        c = database.cursor()
-        getSched = 'SELECT Student.Schedule FROM Student WHERE Student.ID = ' + studentID
-        c.execute(getSched)
-        schedule = list(c.fetchall())
-        c.close()
-
-        # get initial course roster
-        c = database.cursor()
-        getRoster = 'SELECT Course.Roster FROM Course WHERE Course.CRN = ' + getCRN
-        c.execute(getRoster)
-        roster = list(c.fetchall())
-        c.close()
-
-        # add student ID to course roster in Course table
-        newRoster = ''
-        for row in roster:
-            if row[0] == None:
-                for value in studentResult:
-                    newRoster = value[0]
-            elif row[0] != None:
-                for value in studentResult:
-                    newRoster = str(row[0]) + '-' + str(value[0])
-        c = database.cursor()
-        updateRoster = 'UPDATE Course SET Roster = \'' + str(newRoster) + '\' WHERE Course.CRN = ' + str(getCRN)
-        c.execute(updateRoster)
-        c.close()
-
-        # add course to student schedule
-        newSchedule = ''
-        for row in schedule:
-            if row[0] == None:
-                for value in studentResult:
-                    newSchedule = str(getCRN)
-            elif row[0] != None:
-                for value in studentResult:
-                    newSchedule = str(row[0]) + '-' + str(getCRN)
-        c = database.cursor()
-        updateSched = 'UPDATE Student SET Schedule = \'' + newSchedule + '\' WHERE Student.ID = ' + studentID
-        c.execute(updateSched)
-        print('\nCourse Added to Schedule\n')
-        c.close()
-        
-        # commit changes to db
-        database.commit()
+        if not result:
+            # add new tuple to the db that indicates that the student is now registered for this course
+            addTuple = 'INSERT INTO Schedule_Mapping VALUES (' + str(getCRN) + ', ' + str(studentID) + ')'
+            c = database.cursor()
+            c.execute(addTuple)
+            c.close()
+            database.commit()
+            print('The course has been added to your schedule.')
+        else:
+            if result[0] == studentID:
+                print('You are already registered in this course.')
+            else:
+                pass
 
     # remove courses from student schedule
     # author: Chandler Berry
-    def rmCourse(self, studentID, studentEmail):
-
+    def rmCourse(self, studentID):
         # prompt user to enter CRN
-        getCRN = input('enter CRN of course you want to remove: ')
-
-        # get ID of student removing the course from their schedule
+        getCRN = input('Enter CRN of course you want to remove: ')
+        # check if student is actually in the class they are trying to remove
         c = database.cursor()
-        getStudentID = 'SELECT Student.ID FROM Student WHERE Student.Email = \'' + studentEmail + '\''
-        c.execute(getStudentID)
-        studentResult = list(c.fetchall())
-
-        # get initial student schedule
-        c = database.cursor()
-        getSched = 'SELECT Student.Schedule FROM Student WHERE Student.ID = ' + studentID
-        c.execute(getSched)
-        schedule = list(c.fetchall())
+        checkSchedMapping = 'SELECT StudentID FROM Schedule_Mapping WHERE StudentID = ' + str(studentID) + ' AND CourseID = ' + str(getCRN)
+        c.execute(checkSchedMapping)
+        result = c.fetchone()
         c.close()
-
-        # get initial course roster
-        c = database.cursor()
-        getRoster = 'SELECT Course.Roster FROM Course WHERE Course.CRN = ' + getCRN
-        c.execute(getRoster)
-        roster = list(c.fetchall())
-        c.close()
-
-        # remove student ID from course roster in Course table
-        newRoster = ''
-        for row in roster:
-            if row[0] == None:
-                print('you aren\'t registered in this course')
-            elif row[0] != None:
-                findID = ''
-                for value in studentResult:
-                    findID = row[0]
-                    if str(value[0]) in findID:
-                        newRoster = findID
-                        if '-' in newRoster:
-                            rosterList = newRoster.split('-')
-                            rosterList.remove(str(value[0]))
-                            s = '-'
-                            newRoster = s.join(rosterList)
-                        else:
-                            newRoster = ''
-                    else:
-                        print('you aren\'t registered in this course')
-        c = database.cursor()
-        # quick fix for preventing an empty space from being input into the Course table, this was causing a couple issues that can be nipped in the bud right here.
-        updateRoster = 'UPDATE Course SET Roster = \'' + newRoster + '\' WHERE Course.CRN = ' + getCRN
-        if not newRoster:
-            updateRoster = 'UPDATE Course SET Roster = NULL WHERE Course.CRN = ' + getCRN
-        c.execute(updateRoster)
-        c.close()
-
-        # remove course from student schedule
-        newSched = ''
-        for row in schedule:
-            if row[0] == None:
-                print('you aren\'t registered in this course')
-            elif row[0] != None:
-                findCRN = ''
-                for value in schedule:
-                    findCRN = row[0]
-                    if str(value[0]) in findCRN:
-                        newSched = findCRN
-                        if '-' in newRoster:
-                            schedList = newSched.split('-')
-                            schedList.remove(str(value[0]))
-                            s = '-'
-                            newSched = s.join(schedList)
-                        else:
-                            newSched = ''
-                    else:
-                        print('you aren\'t registered in this course')
-        c = database.cursor()
-        updateSched = 'UPDATE Student SET Schedule = \'' + newSched + '\' WHERE Student.ID = ' + studentID
-        if not newSched:
-            updateSched = 'UPDATE Student SET Schedule = NULL WHERE Student.ID = ' + studentID
-        c.execute(updateSched)
-        print('\nCourse Removed from Schedule\n')
-        c.close()
-        
-        # commit changes to db
-        database.commit()
+        if not result:
+            print('You are not registered in this course.')
+        else:
+            if result[0] == studentID:
+                # remove the tuple from the db that indicates this student is registered in this course
+                deleteTuple = 'DELETE FROM Schedule_Mapping WHERE StudentID = ' + str(studentID) + ' AND CourseID = ' + str(getCRN)
+                c = database.cursor()
+                c.execute(deleteTuple)
+                c.close()
+                database.commit()
+                print('The course has been removed from your schedule.')
+            else:
+                pass
 
     # author: Sterling
     # student menu function
@@ -296,10 +200,10 @@ class Student(User):
             choice = input("Welcome to the CURSE registration system.\n1. Add a course\n2. Drop a course\n3. Search courses\n4. View/print schedule\n5. Check conflicts\n6. Logout\nEnter choice : ")
             if choice == '1':
                 print("Add a course to your schedule.")
-                self.addCourse(sID, sEmail)
+                self.addCourse(sID)
             elif choice == '2':
                 print("Drop a course from your schedule.")
-                self.rmCourse(sID, sEmail)
+                self.rmCourse(sID)
             elif choice == '3':
                 print("Searching courses.")
                 self.searchCourses()
@@ -324,39 +228,19 @@ class Instructor(User):
     # print course roster for instructor
     # author: Chandler Berry
     def printRoster(self):
-        try:
-            getCRN = input('enter CRN of course to view roster: ')
-            c = database.cursor()
-            getRoster = 'SELECT Course.Roster FROM Course WHERE Course.CRN = ' + getCRN
-            c.execute(getRoster)
-            rosterResult = list(c.fetchall())
-            c.close()
-
-            rosterString = ''
-            for row in rosterResult:
-                rosterString = row[0]
-            
-            rosterList = []
-            if '-' in rosterString:
-                rosterList = rosterString.split('-')
-            else:
-                rosterList.append(rosterString)
-            
-            studentNames = []
-            for studentID in rosterList:
-                getStudentNames = 'SELECT Student.FirstName, Student.LastName, Student.Major, Student.GradYear FROM Student WHERE Student.ID = ' + studentID
-                c = database.cursor()
-                c.execute(getStudentNames)
-                studentItems = c.fetchone()
-                studentNames.append(studentItems)
-                c.close()
-            print('\n')
-            for eachStudent in studentNames:
-                studentInfo = str(eachStudent[0]) + ' ' + str(eachStudent[1]) + ' - ' + str(eachStudent[2]) + ' - Class of ' + str(eachStudent[3])
-                print(studentInfo)
-            print('\n')
-        except sqlite3.OperationalError:
-            print('\ncourse does not exist, or roster is empty.\n') 
+        # get course ID to view roster
+        getCRN = input('Enter CRN to view roster: ')
+        # get roster from the db
+        getRoster = 'SELECT Student.FirstName, Student.LastName, Course.Title FROM Student INNER JOIN Schedule_Mapping ON StudentID = Student.ID INNER JOIN Course ON Course.CRN = Schedule_Mapping.CourseID WHERE CourseID = ' + str(getCRN) + ' ORDER BY LastName ASC'
+        c = database.cursor()
+        c.execute(getRoster)
+        rosterList = c.fetchall()
+        c.close()
+        # print roster to instructor
+        print('\nRoster for ' + rosterList[0][2] + ':')
+        for student in rosterList:
+            print(student[0] + ' ' + student[1])
+        print('\n')
    
     # author: Naomi
     # printing instructor schedule
@@ -628,3 +512,154 @@ def login():
 def logout():
     print(" \nYou have successfully logged out. \nFor security reasons, exit your web browser.")
     sys.exit()
+
+###############################################
+################### warning ###################
+###### you have entered the shadow realm ######
+###############################################
+
+    # # add courses to student schedule
+    # # author: Chandler Berry
+    # def addCourse(self, studentID, studentEmail):
+
+    #     # prompt user to enter CRN
+    #     getCRN = input('enter CRN of course you want to add: ')
+
+    #     # get ID of student adding the course to their schedule
+    #     c = database.cursor()
+    #     getStudentID = 'SELECT Student.ID FROM Student WHERE Student.Email = \'' + studentEmail + '\''
+    #     c.execute(getStudentID)
+    #     studentResult = list(c.fetchall())
+    #     c.close()
+
+    #     # get initial student schedule
+    #     c = database.cursor()
+    #     getSched = 'SELECT Student.Schedule FROM Student WHERE Student.ID = ' + studentID
+    #     c.execute(getSched)
+    #     schedule = list(c.fetchall())
+    #     c.close()
+
+    #     # get initial course roster
+    #     c = database.cursor()
+    #     getRoster = 'SELECT Course.Roster FROM Course WHERE Course.CRN = ' + getCRN
+    #     c.execute(getRoster)
+    #     roster = list(c.fetchall())
+    #     c.close()
+
+    #     # add student ID to course roster in Course table
+    #     newRoster = ''
+    #     for row in roster:
+    #         if row[0] == None:
+    #             for value in studentResult:
+    #                 newRoster = value[0]
+    #         elif row[0] != None:
+    #             for value in studentResult:
+    #                 newRoster = str(row[0]) + '-' + str(value[0])
+    #     c = database.cursor()
+    #     updateRoster = 'UPDATE Course SET Roster = \'' + str(newRoster) + '\' WHERE Course.CRN = ' + str(getCRN)
+    #     c.execute(updateRoster)
+    #     c.close()
+
+    #     # add course to student schedule
+    #     newSchedule = ''
+    #     for row in schedule:
+    #         if row[0] == None:
+    #             for value in studentResult:
+    #                 newSchedule = str(getCRN)
+    #         elif row[0] != None:
+    #             for value in studentResult:
+    #                 newSchedule = str(row[0]) + '-' + str(getCRN)
+    #     c = database.cursor()
+    #     updateSched = 'UPDATE Student SET Schedule = \'' + newSchedule + '\' WHERE Student.ID = ' + studentID
+    #     c.execute(updateSched)
+    #     print('\nCourse Added to Schedule\n')
+    #     c.close()
+        
+    #     # commit changes to db
+    #     database.commit()
+
+    # # remove courses from student schedule
+    # # author: Chandler Berry
+    # def rmCourse(self, studentID, studentEmail):
+
+    #     # prompt user to enter CRN
+    #     getCRN = input('enter CRN of course you want to remove: ')
+
+    #     # get ID of student removing the course from their schedule
+    #     c = database.cursor()
+    #     getStudentID = 'SELECT Student.ID FROM Student WHERE Student.Email = \'' + studentEmail + '\''
+    #     c.execute(getStudentID)
+    #     studentResult = list(c.fetchall())
+
+    #     # get initial student schedule
+    #     c = database.cursor()
+    #     getSched = 'SELECT Student.Schedule FROM Student WHERE Student.ID = ' + studentID
+    #     c.execute(getSched)
+    #     schedule = list(c.fetchall())
+    #     c.close()
+
+    #     # get initial course roster
+    #     c = database.cursor()
+    #     getRoster = 'SELECT Course.Roster FROM Course WHERE Course.CRN = ' + getCRN
+    #     c.execute(getRoster)
+    #     roster = list(c.fetchall())
+    #     c.close()
+
+    #     # remove student ID from course roster in Course table
+    #     newRoster = ''
+    #     for row in roster:
+    #         if row[0] == None:
+    #             print('you aren\'t registered in this course')
+    #         elif row[0] != None:
+    #             findID = ''
+    #             for value in studentResult:
+    #                 findID = row[0]
+    #                 if str(value[0]) in findID:
+    #                     newRoster = findID
+    #                     if '-' in newRoster:
+    #                         rosterList = newRoster.split('-')
+    #                         rosterList.remove(str(value[0]))
+    #                         s = '-'
+    #                         newRoster = s.join(rosterList)
+    #                     else:
+    #                         newRoster = ''
+    #                 else:
+    #                     print('you aren\'t registered in this course')
+    #     c = database.cursor()
+    #     # quick fix for preventing an empty space from being input into the Course table, this was causing a couple issues that can be nipped in the bud right here.
+    #     updateRoster = 'UPDATE Course SET Roster = \'' + newRoster + '\' WHERE Course.CRN = ' + getCRN
+    #     if not newRoster:
+    #         updateRoster = 'UPDATE Course SET Roster = NULL WHERE Course.CRN = ' + getCRN
+    #     c.execute(updateRoster)
+    #     c.close()
+
+    #     # remove course from student schedule
+    #     newSched = ''
+    #     for row in schedule:
+    #         if row[0] == None:
+    #             print('you aren\'t registered in this course')
+    #         elif row[0] != None:
+    #             findCRN = ''
+    #             for value in schedule:
+    #                 findCRN = row[0]
+    #                 if str(value[0]) in findCRN:
+    #                     newSched = findCRN
+    #                     if '-' in newRoster:
+    #                         schedList = newSched.split('-')
+    #                         schedList.remove(str(value[0]))
+    #                         s = '-'
+    #                         newSched = s.join(schedList)
+    #                     else:
+    #                         newSched = ''
+    #                 else:
+    #                     print('you aren\'t registered in this course')
+    #     c = database.cursor()
+    #     updateSched = 'UPDATE Student SET Schedule = \'' + newSched + '\' WHERE Student.ID = ' + studentID
+    #     if not newSched:
+    #         updateSched = 'UPDATE Student SET Schedule = NULL WHERE Student.ID = ' + studentID
+    #     c.execute(updateSched)
+    #     print('\nCourse Removed from Schedule\n')
+    #     c.close()
+        
+    #     # commit changes to db
+    #     database.commit()

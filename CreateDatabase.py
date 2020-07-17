@@ -7,6 +7,7 @@ c.execute('DROP TABLE IF EXISTS Student')
 c.execute('DROP TABLE IF EXISTS Instructor')
 c.execute('DROP TABLE IF EXISTS Admin')
 c.execute('DROP TABLE IF EXISTS Course')
+c.execute('DROP TABLE IF EXISTS Schedule_Mapping')
 
 createStudentTable = '''
 CREATE TABLE Student (  
@@ -60,6 +61,14 @@ CREATE TABLE Course (
 '''
 c.execute(createCourseTable)
 
+createSchedMappingTable = '''
+CREATE TABLE Schedule_Mapping (
+    CourseID    INT     REFERENCES Course (ID),
+    StudentID   INT     REFERENCES Student (ID)
+);
+'''
+c.execute(createSchedMappingTable)
+
 #adding values to student table 
 c.execute('''INSERT INTO STUDENT VALUES(10001, 'Isaac', 'Newton', 1668, 'BSAS', 'newtoni', 'pass1');''') 
 c.execute('''INSERT INTO STUDENT VALUES(10002, 'Marie', 'Curie', 1903, 'BSAS', 'curiem', 'pass2');''') 
@@ -88,7 +97,22 @@ c.execute('''INSERT INTO COURSE VALUES(31799, 'Applied Programming Concepts','BS
 c.execute('''INSERT INTO COURSE VALUES(31406, 'Signals and Systems', 'HUSS', 'Nelson Mandela', '10-11:50am', 'MW', 'Summer', 2020, 4);''') 
 c.execute('''INSERT INTO COURSE VALUES(31290, 'Computer Architecture', 'BSAS', 'Galileo Galilei', '9:30-10:50am', 'TR', 'Summer', 2020, 4);''') 
 c.execute('''INSERT INTO COURSE VALUES(31047, 'Advanced Digital Circuit Design', 'BSCO', 'Alan Turing', '8-9:20am','WF', 'Summer', 2020, 4);''') 
-c.execute('''INSERT INTO COURSE VALUES(31044, 'Computer Networks', 'BCOS', 'Katie Bouman', '8-9:20am', 'TR', 'Summer', 2020, 4);''') 
+c.execute('''INSERT INTO COURSE VALUES(31044, 'Computer Networks', 'BCOS', 'Katie Bouman', '8-9:20am', 'TR', 'Summer', 2020, 4);''')
+
+#testing the schedule mapping1
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31799, 10001)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31799, 10002)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31799, 10003)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31799, 10004)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31799, 10005)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31799, 10006)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31799, 10007)''')
+
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31406, 10001)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31406, 10010)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31406, 10009)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31406, 10008)''')
+c.execute('''INSERT INTO Schedule_Mapping VALUES (31406, 10007)''')
 
 #printing student table
 print('Student table:')
