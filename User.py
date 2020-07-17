@@ -230,17 +230,26 @@ class Instructor(User):
     def printRoster(self):
         # get course ID to view roster
         getCRN = input('Enter CRN to view roster: ')
-        # get roster from the db
-        getRoster = 'SELECT Student.FirstName, Student.LastName, Course.Title FROM Student INNER JOIN Schedule_Mapping ON StudentID = Student.ID INNER JOIN Course ON Course.CRN = Schedule_Mapping.CourseID WHERE CourseID = ' + str(getCRN) + ' ORDER BY LastName ASC'
+        # check if CRN exists in db
+        findCRN = 'SELECT CRN FROM Course where CRN = ' + str(getCRN)
         c = database.cursor()
-        c.execute(getRoster)
-        rosterList = c.fetchall()
+        c.execute(findCRN)
+        result = c.fetchone()
         c.close()
-        # print roster to instructor
-        print('\nRoster for ' + rosterList[0][2] + ':')
-        for student in rosterList:
-            print(student[0] + ' ' + student[1])
-        print('\n')
+        if not result:
+            print('Course does not exist for this CRN')
+        else:
+            # get roster from the db
+            getRoster = 'SELECT Student.FirstName, Student.LastName, Course.Title FROM Student INNER JOIN Schedule_Mapping ON StudentID = Student.ID INNER JOIN Course ON Course.CRN = Schedule_Mapping.CourseID WHERE CourseID = ' + str(getCRN) + ' ORDER BY LastName ASC'
+            c = database.cursor()
+            c.execute(getRoster)
+            rosterList = c.fetchall()
+            c.close()
+            # print roster to instructor
+            print('\nRoster for ' + rosterList[0][2] + ':')
+            for student in rosterList:
+                print(student[0] + ' ' + student[1])
+            print()
    
     # author: Naomi
     # printing instructor schedule
