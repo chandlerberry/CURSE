@@ -357,10 +357,40 @@ class Instructor(User):
             print('\n')
         except sqlite3.OperationalError:
             print('\ncourse does not exist, or roster is empty.\n') 
+   
+    # author: Naomi
+    # printing instructor schedule
+    def printInstructorSchedule(self, username, upassword):
+        c = database.cursor()
+
+        #getting first and last name of instructor
+        c.execute("""SELECT FirstName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
+        fName = c.fetchall()
+        for i in fName:
+            FName = i[0]
+
+        c.execute("""SELECT LastName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
+        lName = c.fetchall()
+        for i in lName:
+            LName = i[0]
+
+        fullName = FName + " " + LName
+
+        #getting courses where instructor matches first and last name of instructor
+        c.execute("""SELECT Title from Course WHERE Instructor ='""" + fullName + """';""")
+        qr = c.fetchall()
+        c.close()
+
+        if (qr is not None):
+            print("\nYou are not teaching any courses at the moment.\n")
+        else:
+            print("Here is your schedule: \n")
+            for i in qr:
+                print(i[0])
 
     # author: Sterling
     # instructor menu function
-    def instructorMenu(self):
+    def instructorMenu(self, username, upassword):
         choice=""
 
         while 1:
@@ -369,9 +399,8 @@ class Instructor(User):
                 print("Searching courses.")
                 self.searchCourses()
             elif choice == '2':
-                print("Please select a semester and year : ")
+                self.printInstructorSchedule(username, upassword)
             elif choice == '3': 
-                print("Please select a course to print roster : ")
                 self.printRoster()
             elif choice == '4':
                 print("Logging out...")
@@ -453,13 +482,73 @@ class Admin(User):
         # commit changes to db
         database.commit()    
 
+    # author: Naomi
+    # add instructor or student to system
+    def addStudentInstructor(self):
+        c = database.cursor()
+
+        uType = input("Do you want to add a Student or Instructor? ")
+
+        if uType == "Student":
+            sID = input("\nEnter the student's id: ")
+            sEmail = input("Enter the student's email: ")
+
+            c.execute("""SELECT * FROM Student WHERE ID = """ + sID + """ OR Email = '""" + sEmail + """';""")
+            # fetchone() returns a 0 if nothing was found
+            query_result = c.fetchone()
+
+            #result that returned 
+            if (query_result is not None):
+                print("Error : Student already in system.")
+
+            else:
+                sFirstName = input("Enter the student's first name: ")
+                sLastName = input("Enter the student's last name: ")
+                gYear = input("enter the student's graduation year: ")
+                m = input("Enter the student's major: ")
+                sPassword = input("Enter the student's password: ")
+
+                c.execute("""INSERT INTO STUDENT VALUES(""" + sID + """,'""" + sFirstName + """','""" + sLastName + """',""" + gYear + """,'""" + m + """','""" + sEmail + """','""" + sPassword + """',  NULL);""") 
+                print("\nStudent has been added!\n")
+                c.close()
+
+        elif uType == "Instructor":
+            iID = input("\nEnter the instructor's id: ")
+            iEmail = input("Enter the instructor's email: ")
+
+            c.execute("""SELECT * FROM Instructor WHERE ID = """ + iID + """ OR Email = '""" + iEmail + """';""")
+            # fetchone() returns a 0 if nothing was found
+            query_result = c.fetchone()
+
+            #result that returned 
+            if (query_result is not None):
+                print("Error : Instructor already in system.")
+
+            else:
+                iFirstName = input("Enter the instructor's first name: ")
+                iLastName = input("Enter the instructor's last name: ")
+                title = input("enter the instructor's title: ")
+                dept = input("Enter the department the instructor belongs to: ")
+                iPassword = input("Enter the instructor's password: ")
+
+                c.execute("""INSERT INTO INSTRUCTOR VALUES(""" + iID + """,'""" + iFirstName + """','""" + iLastName + """','""" + title + """','""" + dept + """','""" + iEmail + """','""" + iPassword + """',  NULL);""")
+                print("\nInstructor has been added!\n")
+                c.close()
+        else: 
+            print("\nWrong user type. Please enter correct user type to add.")
+            self.addStudentInstructor()
+
+        # commit changes to db
+        database.commit() 
+
+
     # author: Sterling
     # admin menu function
     def adminMenu(self):
         choice = ""
 
         while 1:
-            choice = input("Welcome to the CURSE registration system.\n1. Add a course to system\n2. Remove a course from system\n3. Search courses\n4. View/print schedule\n5. Print roster\n6. Link/unlink user from course\n7. Add user\n8. Logout\nEnter choice : ")
+            choice = input("Welcome to the CURSE registration system.\n1. Add a course to system\n2. Remove a course from system\n3. Search courses\n4. Link/unlink user from course\n5. Add user\n6. Logout\nEnter choice : ")
             if choice == '1':
                 self.addCourseSys()
             elif choice == '2':
@@ -468,15 +557,11 @@ class Admin(User):
                 print("Searching courses.")
                 self.searchCourses()
             elif choice == '4':
-                print("Enter WID# of user to view their schedule : ")
-            elif choice == '5': 
-                print("Enter CRN to print roster : ")
-            elif choice == '6':
                 print("Link/unlink student or instructor to course.")
             #linkUnlink
-            elif choice == '7':
-                print("Add student or instructor?")
-            elif choice == '8':
+            elif choice == '5':
+                self.addStudentInstructor()
+            elif choice == '6':
                 print("Logging out...")
                 logout()
 
@@ -522,7 +607,7 @@ def login():
                     sUser.studentMenu(str(uID), username)
                 elif user == 'Instructor':
                     iUser = Instructor(str(fName), str(lName), str(uID))
-                    iUser.instructorMenu()
+                    iUser.instructorMenu(username, upassword)
                 elif user == 'Admin':
                     aUser = Admin(str(fName), str(lName), str(uID))
                     aUser.adminMenu()
