@@ -26,7 +26,6 @@ A class registration system designed in Applied Programming Concepts
 
 ### Chandler:
 - Check conflicts in course schedule
-- Fix bugs in add/rm courses for students
 - Print student schedule
 
 ### Naomi:
