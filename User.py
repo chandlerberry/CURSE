@@ -381,12 +381,10 @@ class Instructor(User):
         qr = c.fetchall()
         c.close()
 
-        if (qr is not None):
-            print("\nYou are not teaching any courses at the moment.\n")
-        else:
-            print("Here is your schedule: \n")
-            for i in qr:
-                print(i[0])
+        
+        print("Here is your schedule: \n")
+        for i in qr:
+            print(i[0])
 
     # author: Sterling
     # instructor menu function
@@ -394,7 +392,7 @@ class Instructor(User):
         choice=""
 
         while 1:
-            choice = input("Welcome to the CURSE registration system.\n1. Search courses\n2. View/print schedule\n3. Print roster\n4. Logout\nEnter choice : ")
+            choice = input("\nWelcome to the CURSE registration system.\n1. Search courses\n2. View/print schedule\n3. Print roster\n4. Logout\nEnter choice : ")
             if choice == '1': 
                 print("Searching courses.")
                 self.searchCourses()
@@ -548,7 +546,7 @@ class Admin(User):
         choice = ""
 
         while 1:
-            choice = input("Welcome to the CURSE registration system.\n1. Add a course to system\n2. Remove a course from system\n3. Search courses\n4. Link/unlink user from course\n5. Add user\n6. Logout\nEnter choice : ")
+            choice = input("\nWelcome to the CURSE registration system.\n1. Add a course to system\n2. Remove a course from system\n3. Search courses\n4. Link/unlink user from course\n5. Add user\n6. Logout\nEnter choice : ")
             if choice == '1':
                 self.addCourseSys()
             elif choice == '2':
