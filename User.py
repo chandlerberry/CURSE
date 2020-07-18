@@ -191,6 +191,24 @@ class Student(User):
             else:
                 pass
 
+    # print student's schedule provided with the year and semester
+    # author: Chandler Berry
+    def printSched(self, studentID):
+        getYear = input('Enter Year: ')
+        getSemester = input('Enter Semester: ')
+        checkSchedMapping = 'SELECT Course.Title, Course.Times, Course.DaysOfWeek FROM Course INNER JOIN Schedule_Mapping ON Schedule_Mapping.CourseID = Course.CRN WHERE Schedule_Mapping.StudentID = ' + str(studentID) + ' AND Course.Semester = \'' + getSemester + '\' AND Course.Year = \'' + str(getYear) + '\''
+        c = database.cursor()
+        c.execute(checkSchedMapping)
+        schedResult = c.fetchall()
+        c.close()
+        if not schedResult:
+            print('\nNo Schedule found for ' + getSemester + ' ' + str(getYear) + '.\n')
+        else:
+            print('\nYour Schedule for ' + getSemester + ' ' + str(getYear) + ':')
+            for course in schedResult:
+                print(course[1] + '\t\t' + course[2] + '\t' + course[0])
+            print()
+
     # author: Sterling
     # student menu function
     def studentMenu(self, sID, sEmail):
@@ -209,7 +227,7 @@ class Student(User):
                 self.searchCourses()
             elif choice == '4':
                 print("Please select a semester and year : ")
-                #printSchedule()
+                self.printSched(sID)
             elif choice == '5':
                 print("Checking schedule for conflicts.")
                 #checkConflict()
