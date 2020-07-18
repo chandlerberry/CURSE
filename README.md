@@ -27,9 +27,9 @@ A class registration system designed in Applied Programming Concepts
 ### Chandler:
 - Check conflicts in course schedule
 - Print student schedule
+- Search Roster -> DONE
 
 ### Naomi:
-- Search Roster
 - Create Instructor/Student
 - Print instructor course schedule
 
