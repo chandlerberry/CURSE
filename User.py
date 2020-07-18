@@ -255,6 +255,8 @@ class Instructor(User):
     # printing instructor schedule
     def printInstructorSchedule(self, username, upassword):
         c = database.cursor()
+        term = input("Enter the semester you would like to search in: ")
+        yr = input("Enter the year of the semester you would like to search in: ")    
 
         #getting first and last name of instructor
         c.execute("""SELECT FirstName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
@@ -270,13 +272,17 @@ class Instructor(User):
         fullName = FName + " " + LName
 
         #getting courses where instructor matches first and last name of instructor
-        c.execute("""SELECT Title from Course WHERE Instructor ='""" + fullName + """';""")
+        c.execute("""SELECT Title from Course WHERE Instructor ='""" + fullName + """' AND Semester = '""" + term + """' AND Year = '""" + yr + """';""")
         qr = c.fetchall()
         c.close()
-        
-        print("Here is your schedule: ")
-        for i in qr:
-            print(i[0])
+        if not qr:
+            print("\nYou do not have a schedule at the moment with the entered criterias. Please try again.")
+        else:
+            print("\nHere is your schedule: ")
+            for i in qr:
+                print(i[0])
+
+            
 
     # author: Sterling
     # instructor menu function
@@ -398,7 +404,7 @@ class Admin(User):
                 m = input("Enter the student's major: ")
                 sPassword = input("Enter the student's password: ")
 
-                c.execute("""INSERT INTO STUDENT VALUES(""" + sID + """,'""" + sFirstName + """','""" + sLastName + """',""" + gYear + """,'""" + m + """','""" + sEmail + """','""" + sPassword + """',  NULL);""") 
+                c.execute("""INSERT INTO STUDENT VALUES(""" + sID + """,'""" + sFirstName + """','""" + sLastName + """',""" + gYear + """,'""" + m + """','""" + sEmail + """','""" + sPassword + """');""") 
                 print("\nStudent has been added!\n")
                 c.close()
 
@@ -421,7 +427,7 @@ class Admin(User):
                 dept = input("Enter the department the instructor belongs to: ")
                 iPassword = input("Enter the instructor's password: ")
 
-                c.execute("""INSERT INTO INSTRUCTOR VALUES(""" + iID + """,'""" + iFirstName + """','""" + iLastName + """','""" + title + """','""" + dept + """','""" + iEmail + """','""" + iPassword + """',  NULL);""")
+                c.execute("""INSERT INTO INSTRUCTOR VALUES(""" + iID + """,'""" + iFirstName + """','""" + iLastName + """','""" + title + """','""" + dept + """','""" + iEmail + """','""" + iPassword + """');""")
                 print("\nInstructor has been added!\n")
                 c.close()
         else: 
