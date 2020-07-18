@@ -451,7 +451,17 @@ class Admin(User):
                 print("Canceled. No changes have been made.")
 
         # commit changes to db
-        database.commit()    
+        database.commit()  
+
+    def linkStudent():
+        getCRN = input("Enter CRN of course you want to add a student to : ")
+        c = database.cursor()
+        c.execute("""SELECT * FROM COURSE WHERE CRN = """ + getCRN + """;""")
+        qr1 = c.fetchone()
+        c.close()
+        getStudentID = input("CRN of Studentn : ")
+        c = database.cursor()
+        c.execute("""SELECT * FROM STUDENT WHERE ID""")
 
     # author: Sterling
     # admin menu function
