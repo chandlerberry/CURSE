@@ -216,6 +216,8 @@ class Student(User):
             elif choice == '6':
                 print("Logging out...")
                 logout()
+            else:
+                print("¯\_(ツ)_/¯ Invalid input.")
 
 # class Instructor derived from User
 class Instructor(User):
@@ -298,6 +300,8 @@ class Instructor(User):
             elif choice == '4':
                 print("Logging out...")
                 logout()
+            else:
+                print("¯\_(ツ)_/¯ Invalid input.")
 
 # class admin derived from user
 class Admin(User):  
@@ -334,10 +338,9 @@ class Admin(User):
             semester = input("Semester (Fall, Spring, Summer) : ")
             year = input("Year : ")
             cred = input("# of credits : ")
-            roster = 'NULL'
             # inserting new info into database
             c = database.cursor()
-            c.execute("""INSERT INTO Course VALUES(""" + CRN + """, '""" + title + """', '""" + dept + """', '""" + iName + """', '""" + time + """', '""" + day + """', '""" + semester + """', """ + year + """, """ + cred + """, """ + roster + """);""")
+            c.execute("""INSERT INTO Course VALUES(""" + CRN + """, '""" + title + """', '""" + dept + """', '""" + iName + """', '""" + time + """', '""" + day + """', '""" + semester + """', """ + year + """, """ + cred + """);""")
             c.execute("""SELECT * FROM Course WHERE CRN = """ + CRN + """;""")
             query_result = c.fetchone()
             c.close()
@@ -363,7 +366,7 @@ class Admin(User):
         else:
             for i in query_result:
                 print(i)
-            choice = input("Are you sure you want to remove this? y/n : ")
+            choice = input("Are you sure you want to remove this? (y for yes, any other key for no) : ")
             if (choice == 'y'):
                 c = database.cursor()
                 c.execute("""DELETE FROM COURSE WHERE CRN = """ + removeCRN + """;""")
@@ -375,15 +378,182 @@ class Admin(User):
         # commit changes to db
         database.commit()  
 
-    def linkStudent():
-        getCRN = input("Enter CRN of course you want to add a student to : ")
-        c = database.cursor()
-        c.execute("""SELECT * FROM COURSE WHERE CRN = """ + getCRN + """;""")
-        qr1 = c.fetchone()
-        c.close()
-        getStudentID = input("CRN of Studentn : ")
-        c = database.cursor()
-        c.execute("""SELECT * FROM STUDENT WHERE ID""")
+    def linkStudent(self):
+        # Getting info from user
+        try:
+            getCRN = input("Enter CRN of course you want to add a student to : ")
+            c = database.cursor()
+            # Printing out the results so user knows they're choosing the right course and student
+            c.execute("""SELECT * FROM COURSE WHERE CRN = """ + getCRN + """;""")
+            qr1 = c.fetchone()
+            c.close()
+            if qr1 is None:
+                print("CRN does not exist in system.")
+            else:
+                for i in qr1:
+                    print(i)
+                getFName = input("First Name of Student : ")
+                getLName = input("Last Name : ")
+                getStudentID = input("ID of Student : ")
+                c = database.cursor()
+                c.execute('SELECT * FROM STUDENT WHERE ID = ' + getStudentID + ' AND FirstName = ' + getFName + ' AND LastName = ' + getLName + ';')
+                qr1 = c.fetchone()
+                c.close()
+                if qr1 is None:
+                    print("Student does not exist in system.")
+                else:
+                    for i in qr1:
+                        print(i)
+                    # Check if student is already registered for course
+                    c = database.cursor()
+                    c.execute('SELECT StudentID FROM Schedule_Mapping WHERE StudentID = ' + str(getStudentID) + ' AND CourseID = ' + str(getCRN))
+                    qr1 = c.fetchone()
+                    c.close()
+                    if qr1 is not None:
+                        for i in qr1:
+                            print(i)
+                        print("Student " + getFName + " " + getLName + " is already registered for " + getCRN + "." )
+                    else:
+                        confirm = input("Confirm link (y/n) : ")
+                        if confirm == 'y':
+                            c = database.cursor()
+                            c.execute('INSERT INTO Schedule_Mapping VALUES (' + str(getCRN) + ', ' + str(getStudentID) + ');')
+                            database.commit()
+                            print("Success.")
+                        else:
+                            print("No changes have been made.")
+        except:
+            print("( ͡ʘ ͜ʖ ͡ʘ) Invalid criteria. Please enter data again.")
+        
+    def unlinkStudent(self):
+        try:
+            # Getting info from user
+            getCRN = input("Enter CRN of course you want to remove a student from : ")
+            c = database.cursor()
+            c.execute('SELECT * FROM Schedule_Mapping WHERE CourseID = ' + getCRN + ';')
+            qr1 = c.fetchone()
+            c.close()
+            if qr1 is None:
+                print("Cannot unlink Student because Course Roster is empty, or CRN doesn't exist.")
+            else:
+                getStudentID = input("Input ID of Student to unlink from Course : ")
+                # Checking if student is actually registered to course
+                c = database.cursor()
+                c.execute('SELECT * FROM Schedule_Mapping WHERE CourseID = ' + getCRN + ' AND StudentID = ' + getStudentID + ';')
+                qr1 = c.fetchone()
+                c.close()
+                if qr1 is None:
+                    print("Student is not already registered for " + getCRN + ", or Student does not exist in system.")
+                else:
+                    print("Removing : ")
+                    c = database.cursor()
+                    c.execute('SELECT * FROM Student WHERE ID = ' + getStudentID + ';')
+                    qr1 = c.fetchone()
+                    c.close()
+                    for i in qr1:
+                        print(i)
+                    print("From : ")
+                    c = database.cursor()
+                    c.execute('SELECT * FROM Course WHERE CRN = ' + getCRN + ';')
+                    qr1 = c.fetchone()
+                    c.close()
+                    for i in qr1:
+                        print(i)
+                    confirm = input("Confirm y/n : ")
+                    if confirm == 'y':
+                        c = database.cursor()
+                        c.execute('DELETE FROM Schedule_Mapping WHERE CourseID = ' + getCRN + ' AND StudentID = ' + getStudentID + ';')
+                        qr1 = c.fetchone()
+                        c.close()
+                        database.commit()
+                        print("Success.")
+                    else:
+                        print("No changes have been made.")
+        except:
+            print("( ͡ʘ ͜ʖ ͡ʘ) Invalid criteria. Please enter data again.")
+
+    def linkInstructor(self):
+        try:
+            getCRN = input("Enter CRN of course to add instructor to : ")
+            c = database.cursor()
+            # Printing out the results so user knows they're choosing the right course and student
+            c.execute("""SELECT * FROM COURSE WHERE CRN = """ + getCRN + """;""")
+            qr1 = c.fetchone()
+            c.close()
+            if qr1 is None:
+                print("CRN does not exist in system.")
+            else:
+                getFirstName = input("Enter First Name of Instructor : ")
+                getLastName = input("Enter Last Name : ")
+                getID = input("Enter Instructor ID : ")
+                c = database.cursor()
+                c.execute("""SELECT FirstName, LastName FROM Instructor WHERE Firstname = '""" + getFirstName + """' AND LastName = '""" + getLastName + """' AND ID  = """ + getID + """;""")
+                Name = c.fetchall()
+                for i in Name:
+                    FName = i[0]
+                    LName = i[1]
+                fullName = FName + " " + LName
+                c.close()
+                c = database.cursor()
+                c.execute("""SELECT Instructor FROM Course WHERE Instructor = '""" + fullName + """' AND CRN = """ + getCRN + """;""")
+                qr1 = c.fetchone()
+                if qr1 is not None:
+                    print(fullName + " is already teaching this Course " + getCRN + ".")
+                else:    
+                    c = database.cursor()
+                    c.execute("""SELECT Instructor FROM Course WHERE Instructor = 'TBA' AND CRN = """ + getCRN + """;""")
+                    qr1 = c.fetchone()
+                    c.close()
+                    # if it finds the TBA (course is available for teaching)
+                    if qr1 is not None:
+                        insertName = getFirstName + " " + getLastName
+                        confirmInsert = input(insertName + " will be teaching " + getCRN + "\nConfirm (y for yes, anything else for no) : ")
+                        if confirmInsert == 'y':
+                            c = database.cursor()                  
+                            c.execute("""UPDATE Course SET Instructor = '""" + insertName + """' WHERE CRN = """ + getCRN + """;""")
+                            c.close()
+                            print("Success.")
+                            database.commit()
+                        else:
+                            print("No changes have been made.")
+                    else: # if there is already a name here
+                        print("Course is already being taught by another Instructor.")
+        except:
+            print("( ͡ʘ ͜ʖ ͡ʘ) Invalid criteria. Please enter data again.")
+
+    def unlinkInstructor(self):
+        try:
+            # Get CRN from user
+            getCRN = input("Enter CRN of Course to unlink Instructor : ")
+            c = database.cursor()
+            # Checking if CRN exists in system
+            c.execute("""SELECT * FROM COURSE WHERE CRN = """ + getCRN + """;""")
+            qr1 = c.fetchone()
+            c.close()
+            if qr1 is None:
+                print("CRN does not exist in system.")
+            else:
+                c = database.cursor()
+                # Seeing who is teaching
+                c.execute("""SELECT Instructor FROM Course WHERE CRN = """ + getCRN + """;""")
+                qr1 = c.fetchall()
+                c.close()
+
+                for i in qr1:
+                    inst = i[0]
+
+                confirm3 = input("Would you like to remove " + inst + " from course " + getCRN + " (y for yes, anything else for no) : ")
+
+                if confirm3 == 'y':
+                    c = database.cursor()                  
+                    c.execute("""UPDATE Course SET Instructor = 'TBA' WHERE CRN = """ + getCRN + """;""")
+                    c.close()
+                    print("Success.")
+                    database.commit()
+                else:
+                    print("No changes have been made.")
+        except:
+            print("( ͡ʘ ͜ʖ ͡ʘ) Invalid criteria. Please enter data again.")
 
     # author: Naomi
     # add instructor or student to system
@@ -451,7 +621,7 @@ class Admin(User):
         choice = ""
 
         while 1:
-            choice = input("Welcome to the CURSE registration system.\n1. Add a course to system\n2. Remove a course from system\n3. Search courses\n4. Link/unlink user from course\n5. Add user\n6. Logout\nEnter choice : ")
+            choice = input("\nWelcome to the CURSE registration system.\n1. Add a course to system\n2. Remove a course from system\n3. Search courses\n4. Link/unlink user from course\n5. Add user\n6. Logout\nEnter choice : ")
             if choice == '1':
                 self.addCourseSys()
             elif choice == '2':
@@ -461,12 +631,30 @@ class Admin(User):
                 self.searchCourses()
             elif choice == '4':
                 print("Link/unlink student or instructor to course.")
-            #linkUnlink
+                linkChoice = input("1. Link or 2. Unlink? : ")
+                if linkChoice == '1':
+                    StOrI = input("1. Student or 2. Instructor? : ")
+                    if StOrI == '1':
+                        self.linkStudent()
+                    elif StOrI == '2':
+                        self.linkInstructor()
+                    else:
+                        print("¯\_(ツ)_/¯ Invalid input.")
+                elif linkChoice == '2':
+                    StOrI = input("1. Student or 2. Instructor? : ")
+                    if StOrI == '1':
+                        self.unlinkStudent()
+                    elif StOrI == '2':
+                        self.unlinkInstructor()
+                    else:
+                        print("¯\_(ツ)_/¯ Invalid input.")
             elif choice == '5':
                 self.addStudentInstructor()
             elif choice == '6':
                 print("Logging out...")
                 logout()
+            else:
+                print("¯\_(ツ)_/¯ Invalid input.")
 
 # author: Naomi Torre
 # login function
