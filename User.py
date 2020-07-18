@@ -259,15 +259,11 @@ class Instructor(User):
         yr = input("Enter the year of the semester you would like to search in: ")    
 
         #getting first and last name of instructor
-        c.execute("""SELECT FirstName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
+        c.execute("""SELECT FirstName, LastName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
         fName = c.fetchall()
         for i in fName:
             FName = i[0]
-
-        c.execute("""SELECT LastName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
-        lName = c.fetchall()
-        for i in lName:
-            LName = i[0]
+            LName = i[1]
 
         fullName = FName + " " + LName
 
