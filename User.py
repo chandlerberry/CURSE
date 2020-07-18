@@ -250,6 +250,30 @@ class Instructor(User):
             for student in rosterList:
                 print(student[0] + ' ' + student[1])
             print()
+    
+    # search a course roster for a particular student, given the course number and student ID
+    # author: Chandler Berry
+    def searchRoster(self):
+        getCRN = input('Enter CRN of course you want to search: ')
+        findCRN = 'SELECT CRN FROM Course where CRN = ' + str(getCRN)
+        c = database.cursor()
+        c.execute(findCRN)
+        result = c.fetchone()
+        c.close()
+        if not result:
+            print('Course does not exist for this CRN')
+        else:
+            getStudentID = input('Enter student ID to find the student in the course: ')
+            searchSchedMapping = 'SELECT Student.FirstName, Student.LastName FROM Student INNER JOIN Schedule_Mapping ON StudentID = Student.ID WHERE Schedule_Mapping.CourseID = ' + str(getCRN) + ' AND Student.ID = ' + str(getStudentID)
+            c = database.cursor()
+            c.execute(searchSchedMapping)
+            result = c.fetchall()
+            c.close()
+            if not result:
+                print('No student found registered for this course with ID: ' + str(getStudentID))
+            else:
+                studentMatch = result[0][0] + ' ' + result[0][1]
+                print(studentMatch)
    
     # author: Naomi
     # printing instructor schedule
