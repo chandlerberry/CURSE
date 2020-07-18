@@ -272,15 +272,15 @@ class Instructor(User):
         fullName = FName + " " + LName
 
         #getting courses where instructor matches first and last name of instructor
-        c.execute("""SELECT Title from Course WHERE Instructor ='""" + fullName + """' AND Semester = '""" + term + """' AND Year = '""" + yr + """';""")
+        c.execute("""SELECT Title, Times, DaysOfWeek from Course WHERE Instructor ='""" + fullName + """' AND Semester = '""" + term + """' AND Year = '""" + yr + """';""")
         qr = c.fetchall()
         c.close()
         if not qr:
             print("\nYou do not have a schedule at the moment with the entered criterias. Please try again.")
         else:
-            print("\nHere is your schedule: ")
+            print("\nHere is your " + term + " " + yr + " schedule: ")
             for i in qr:
-                print(i[0])
+                print(i[0] + "    " + i[2] + "    " + i[1])
 
             
 
