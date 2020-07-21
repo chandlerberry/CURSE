@@ -133,6 +133,73 @@ class User:
             print("invalid choice! \n Please try again.")
             self.searchCourses()
 
+    # returns a list of schedule conflict notifications to the user, if any are found
+    # author: Chandler Berry
+    def checkConflicts(self, studentID, courseID):
+        # get year and semester info
+        year = input('Enter Year: ')
+        semester = input('Enter Semester: ')
+
+        # queries
+        getCourse = 'SELECT Title, Times, DaysOfWeek FROM Course WHERE CRN = ' + str(courseID) + ' AND Year = \'' + str(year) + '\' AND Semester = \'' + str(semester) + '\''
+        getSched = 'SELECT Course.Title, Course.Times, Course.DaysOfWeek FROM Course INNER JOIN Schedule_Mapping ON Schedule_Mapping.CourseID = Course.CRN WHERE Schedule_Mapping.StudentID = ' + str(studentID) + ' AND Course.Year = \'' + str(year) + '\' AND Course.Semester = \'' + str(semester) + '\''
+        
+        # get info of course being compared
+        c = database.cursor()
+        c.execute(getCourse)
+        newCourse = c.fetchone()
+        c.close()
+
+        # split string values of time and day info for the new course
+        newCourseTimes = newCourse[1].split('-')
+        newCourseDays = list(newCourse[2])
+
+        # get course start and end times into an int format to be compared with the student's existing schedule
+        unwantedChars = [':', 'a', 'm', 'p']
+        for c in unwantedChars:
+            newCourseTimes[0] = newCourseTimes[0].replace(c, '')
+            newCourseTimes[1] = newCourseTimes[1].replace(c, '')
+        newCourseTimes[0] = int(newCourseTimes[0])
+        newCourseTimes[1] = int(newCourseTimes[1])
+
+        # get student schedule to compare
+        c = database.cursor()
+        c.execute(getSched)
+        sched = c.fetchall()
+        c.close()
+
+        # empty list of conflicts that will be filled with strings if any conflicts are found
+        conflictList = []
+
+        # iterate through each course in the student's existing schedule
+        for course in sched:
+            # split string values of time and day info for each course in the student's existing schedule
+            times = course[1].split('-')
+            days = list(course[2])
+
+            # get each course's start and end time in int format
+            for c in unwantedChars:
+                times[0] = times[0].replace(c, '')
+                times[1] = times[1].replace(c, '')
+            times[0] = int(times[0])
+            times[1] = int(times[1])
+
+            # compare new course info with course in existing student schedule, return true/false if conflict is found/not found
+            for day in days:
+                for newDay in newCourseDays:
+                    # if date matches, compare times
+                    if day == newDay:
+                        #   start times match                  end times match                    starts in the middle of other class                                ends in the middle of other class
+                        if (newCourseTimes[0] == times[0]) or (newCourseTimes[1] == times[1]) or (newCourseTimes[0] > times[0] and newCourseTimes[0] < times[1]) or (newCourseTimes[1] > times[0] and newCourseTimes[1] < times[1]):
+                            conflict = 'CONFLICT FOUND WITH COURSE ' + course[0] + ' ON DAY: ' + day
+                            conflictList.append(conflict)
+                        else:
+                            continue
+                    else:
+                        continue
+
+        return conflictList
+
 # class Student derived from User
 class Student(User):
 
@@ -153,12 +220,19 @@ class Student(User):
         result = c.fetchone()
         c.close()
         if not result:
-            # add new tuple to the db that indicates that the student is now registered for this course
-            addTuple = 'INSERT INTO Schedule_Mapping VALUES (' + str(getCRN) + ', ' + str(studentID) + ')'
-            c = database.cursor()
-            c.execute(addTuple)
-            c.close()
-            database.commit()
+            # determine if course being registered does not conflict with the rest of the student's schedule
+            conflicts = self.checkConflicts(studentID, getCRN)
+            # if no conflict(s) found, add the course
+            if len(conflicts) == 0:
+                # add new tuple to the db that indicates that the student is now registered for this course
+                addTuple = 'INSERT INTO Schedule_Mapping VALUES (' + str(getCRN) + ', ' + str(studentID) + ')'
+                c = database.cursor()
+                c.execute(addTuple)
+                c.close()
+                database.commit()
+            # if conflict(s) are found, print them to the user
+            else:
+                print(*conflicts, sep = '\n')
             print('The course has been added to your schedule.')
         else:
             if result[0] == studentID:
