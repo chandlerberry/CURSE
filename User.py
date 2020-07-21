@@ -303,9 +303,6 @@ class Student(User):
                 print("Please select a semester and year : ")
                 self.printSched(sID)
             elif choice == '5':
-                print("Checking schedule for conflicts.")
-                #checkConflict()
-            elif choice == '6':
                 print("Logging out...")
                 logout()
             else:
@@ -441,7 +438,7 @@ class Admin(User):
 
         #result that returned 
         if (query_result is not None):
-            print("Error : CRN already exists.")
+            print("\nError : CRN already exists.")
             for i in query_result:
                 print(i)
                 
@@ -511,17 +508,18 @@ class Admin(User):
                 getLName = input("Last Name : ")
                 getStudentID = input("ID of Student : ")
                 c = database.cursor()
-                c.execute('SELECT * FROM STUDENT WHERE ID = ' + getStudentID + ' AND FirstName = ' + getFName + ' AND LastName = ' + getLName + ';')
+                c.execute("""SELECT * FROM STUDENT WHERE ID = '""" + getStudentID + """' AND FirstName = '""" + getFName + """' AND LastName = '""" + getLName + """';""")
                 qr1 = c.fetchone()
                 c.close()
                 if qr1 is None:
                     print("Student does not exist in system.")
                 else:
+                    # checking for conflicting course in student schedule
                     for i in qr1:
                         print(i)
                     # Check if student is already registered for course
                     c = database.cursor()
-                    c.execute('SELECT StudentID FROM Schedule_Mapping WHERE StudentID = ' + str(getStudentID) + ' AND CourseID = ' + str(getCRN))
+                    c.execute("""SELECT StudentID FROM Schedule_Mapping WHERE StudentID = '""" + str(getStudentID) + """' AND CourseID = '""" + str(getCRN) + """';""")
                     qr1 = c.fetchone()
                     c.close()
                     if qr1 is not None:
@@ -529,14 +527,20 @@ class Admin(User):
                             print(i)
                         print("Student " + getFName + " " + getLName + " is already registered for " + getCRN + "." )
                     else:
-                        confirm = input("Confirm link (y/n) : ")
-                        if confirm == 'y':
-                            c = database.cursor()
-                            c.execute('INSERT INTO Schedule_Mapping VALUES (' + str(getCRN) + ', ' + str(getStudentID) + ');')
-                            database.commit()
-                            print("Success.")
+                        # checking for conflicting course in student schedule
+                        conflicts = self.checkConflicts(getStudentID, getCRN)
+                        # if the length of the conflicts list is zero, that means there were no conflicts
+                        if len(conflicts) == 0:
+                            confirm = input("Confirm link (y/n) : ")
+                            if confirm == 'y':
+                                c = database.cursor()
+                                c.execute("""INSERT INTO Schedule_Mapping VALUES (""" + str(getCRN) + """, """ + str(getStudentID) + """);""")
+                                database.commit()
+                                print("Success.")
+                            else:
+                                print("No changes have been made.")
                         else:
-                            print("No changes have been made.")
+                            print(*conflicts, sep = '\n')
         except:
             print("( ͡ʘ ͜ʖ ͡ʘ) Invalid criteria. Please enter data again.")
         
@@ -545,7 +549,7 @@ class Admin(User):
             # Getting info from user
             getCRN = input("Enter CRN of course you want to remove a student from : ")
             c = database.cursor()
-            c.execute('SELECT * FROM Schedule_Mapping WHERE CourseID = ' + getCRN + ';')
+            c.execute("""SELECT * FROM Schedule_Mapping WHERE CourseID = '""" + getCRN + """';""")
             qr1 = c.fetchone()
             c.close()
             if qr1 is None:
@@ -554,7 +558,7 @@ class Admin(User):
                 getStudentID = input("Input ID of Student to unlink from Course : ")
                 # Checking if student is actually registered to course
                 c = database.cursor()
-                c.execute('SELECT * FROM Schedule_Mapping WHERE CourseID = ' + getCRN + ' AND StudentID = ' + getStudentID + ';')
+                c.execute("""SELECT * FROM Schedule_Mapping WHERE CourseID = '""" + getCRN + """' AND StudentID = '""" + getStudentID + """';""")
                 qr1 = c.fetchone()
                 c.close()
                 if qr1 is None:
@@ -562,14 +566,14 @@ class Admin(User):
                 else:
                     print("Removing : ")
                     c = database.cursor()
-                    c.execute('SELECT * FROM Student WHERE ID = ' + getStudentID + ';')
+                    c.execute("""SELECT * FROM Student WHERE ID = '""" + getStudentID + """';""")
                     qr1 = c.fetchone()
                     c.close()
                     for i in qr1:
                         print(i)
                     print("From : ")
                     c = database.cursor()
-                    c.execute('SELECT * FROM Course WHERE CRN = ' + getCRN + ';')
+                    c.execute("""SELECT * FROM Course WHERE CRN = '""" + getCRN + """';""")
                     qr1 = c.fetchone()
                     c.close()
                     for i in qr1:
@@ -577,7 +581,7 @@ class Admin(User):
                     confirm = input("Confirm y/n : ")
                     if confirm == 'y':
                         c = database.cursor()
-                        c.execute('DELETE FROM Schedule_Mapping WHERE CourseID = ' + getCRN + ' AND StudentID = ' + getStudentID + ';')
+                        c.execute("""DELETE FROM Schedule_Mapping WHERE CourseID = '""" + getCRN + """' AND StudentID = '""" + getStudentID + """';""")
                         qr1 = c.fetchone()
                         c.close()
                         database.commit()
