@@ -25,11 +25,11 @@ A class registration system designed in Applied Programming Concepts
 ## Division of Labor:
 
 ### Chandler:
-- Check conflicts in course schedule
-- Print student schedule
+- Check conflicts in course schedule -> WIP
+- Print student schedule -> DONE
+- Search Roster -> DONE
 
 ### Naomi:
-- Search Roster
 - Create Instructor/Student
 - Print instructor course schedule
 

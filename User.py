@@ -133,6 +133,73 @@ class User:
             print("invalid choice! \n Please try again.")
             self.searchCourses()
 
+    # returns a list of schedule conflict notifications to the user, if any are found
+    # author: Chandler Berry
+    def checkConflicts(self, studentID, courseID):
+        # get year and semester info
+        year = input('Enter Year: ')
+        semester = input('Enter Semester: ')
+
+        # queries
+        getCourse = 'SELECT Title, Times, DaysOfWeek FROM Course WHERE CRN = ' + str(courseID) + ' AND Year = \'' + str(year) + '\' AND Semester = \'' + str(semester) + '\''
+        getSched = 'SELECT Course.Title, Course.Times, Course.DaysOfWeek FROM Course INNER JOIN Schedule_Mapping ON Schedule_Mapping.CourseID = Course.CRN WHERE Schedule_Mapping.StudentID = ' + str(studentID) + ' AND Course.Year = \'' + str(year) + '\' AND Course.Semester = \'' + str(semester) + '\''
+        
+        # get info of course being compared
+        c = database.cursor()
+        c.execute(getCourse)
+        newCourse = c.fetchone()
+        c.close()
+
+        # split string values of time and day info for the new course
+        newCourseTimes = newCourse[1].split('-')
+        newCourseDays = list(newCourse[2])
+
+        # get course start and end times into an int format to be compared with the student's existing schedule
+        unwantedChars = [':', 'a', 'm', 'p']
+        for c in unwantedChars:
+            newCourseTimes[0] = newCourseTimes[0].replace(c, '')
+            newCourseTimes[1] = newCourseTimes[1].replace(c, '')
+        newCourseTimes[0] = int(newCourseTimes[0])
+        newCourseTimes[1] = int(newCourseTimes[1])
+
+        # get student schedule to compare
+        c = database.cursor()
+        c.execute(getSched)
+        sched = c.fetchall()
+        c.close()
+
+        # empty list of conflicts that will be filled with strings if any conflicts are found
+        conflictList = []
+
+        # iterate through each course in the student's existing schedule
+        for course in sched:
+            # split string values of time and day info for each course in the student's existing schedule
+            times = course[1].split('-')
+            days = list(course[2])
+
+            # get each course's start and end time in int format
+            for c in unwantedChars:
+                times[0] = times[0].replace(c, '')
+                times[1] = times[1].replace(c, '')
+            times[0] = int(times[0])
+            times[1] = int(times[1])
+
+            # compare new course info with course in existing student schedule, return true/false if conflict is found/not found
+            for day in days:
+                for newDay in newCourseDays:
+                    # if date matches, compare times
+                    if day == newDay:
+                        #   start times match                  end times match                    starts in the middle of other class                                ends in the middle of other class
+                        if (newCourseTimes[0] == times[0]) or (newCourseTimes[1] == times[1]) or (newCourseTimes[0] > times[0] and newCourseTimes[0] < times[1]) or (newCourseTimes[1] > times[0] and newCourseTimes[1] < times[1]):
+                            conflict = 'CONFLICT FOUND WITH COURSE ' + course[0] + ' ON DAY: ' + day
+                            conflictList.append(conflict)
+                        else:
+                            continue
+                    else:
+                        continue
+
+        return conflictList
+
 # class Student derived from User
 class Student(User):
 
@@ -153,12 +220,19 @@ class Student(User):
         result = c.fetchone()
         c.close()
         if not result:
-            # add new tuple to the db that indicates that the student is now registered for this course
-            addTuple = 'INSERT INTO Schedule_Mapping VALUES (' + str(getCRN) + ', ' + str(studentID) + ')'
-            c = database.cursor()
-            c.execute(addTuple)
-            c.close()
-            database.commit()
+            # determine if course being registered does not conflict with the rest of the student's schedule
+            conflicts = self.checkConflicts(studentID, getCRN)
+            # if no conflict(s) found, add the course
+            if len(conflicts) == 0:
+                # add new tuple to the db that indicates that the student is now registered for this course
+                addTuple = 'INSERT INTO Schedule_Mapping VALUES (' + str(getCRN) + ', ' + str(studentID) + ')'
+                c = database.cursor()
+                c.execute(addTuple)
+                c.close()
+                database.commit()
+            # if conflict(s) are found, print them to the user
+            else:
+                print(*conflicts, sep = '\n')
             print('The course has been added to your schedule.')
         else:
             if result[0] == studentID:
@@ -191,13 +265,31 @@ class Student(User):
             else:
                 pass
 
+    # print student's schedule provided with the year and semester
+    # author: Chandler Berry
+    def printSched(self, studentID):
+        getYear = input('Enter Year: ')
+        getSemester = input('Enter Semester: ')
+        checkSchedMapping = 'SELECT Course.Title, Course.Times, Course.DaysOfWeek FROM Course INNER JOIN Schedule_Mapping ON Schedule_Mapping.CourseID = Course.CRN WHERE Schedule_Mapping.StudentID = ' + str(studentID) + ' AND Course.Semester = \'' + getSemester + '\' AND Course.Year = \'' + str(getYear) + '\''
+        c = database.cursor()
+        c.execute(checkSchedMapping)
+        schedResult = c.fetchall()
+        c.close()
+        if not schedResult:
+            print('\nNo Schedule found for ' + getSemester + ' ' + str(getYear) + '.\n')
+        else:
+            print('\nYour Schedule for ' + getSemester + ' ' + str(getYear) + ':')
+            for course in schedResult:
+                print(course[1] + '\t\t' + course[2] + '\t' + course[0])
+            print()
+
     # author: Sterling
     # student menu function
     def studentMenu(self, sID, sEmail):
         choice=""
 
         while 1:
-            choice = input("Welcome to the CURSE registration system.\n1. Add a course\n2. Drop a course\n3. Search courses\n4. View/print schedule\n5. Check conflicts\n6. Logout\nEnter choice : ")
+            choice = input("\nWelcome to the CURSE registration system.\n1. Add a course\n2. Drop a course\n3. Search courses\n4. View/print schedule\n5. Check conflicts\n6. Logout\nEnter choice : ")
             if choice == '1':
                 print("Add a course to your schedule.")
                 self.addCourse(sID)
@@ -209,7 +301,7 @@ class Student(User):
                 self.searchCourses()
             elif choice == '4':
                 print("Please select a semester and year : ")
-                #printSchedule()
+                self.printSched(sID)
             elif choice == '5':
                 print("Checking schedule for conflicts.")
                 #checkConflict()
@@ -252,36 +344,59 @@ class Instructor(User):
             for student in rosterList:
                 print(student[0] + ' ' + student[1])
             print()
+    
+    # search a course roster for a particular student, given the course number and student ID
+    # author: Chandler Berry
+    def searchRoster(self):
+        getCRN = input('Enter CRN of course you want to search: ')
+        findCRN = 'SELECT CRN FROM Course where CRN = ' + str(getCRN)
+        c = database.cursor()
+        c.execute(findCRN)
+        result = c.fetchone()
+        c.close()
+        if not result:
+            print('Course does not exist for this CRN')
+        else:
+            getStudentID = input('Enter student ID to find the student in the course: ')
+            searchSchedMapping = 'SELECT Student.FirstName, Student.LastName FROM Student INNER JOIN Schedule_Mapping ON StudentID = Student.ID WHERE Schedule_Mapping.CourseID = ' + str(getCRN) + ' AND Student.ID = ' + str(getStudentID)
+            c = database.cursor()
+            c.execute(searchSchedMapping)
+            result = c.fetchall()
+            c.close()
+            if not result:
+                print('No student found registered for this course with ID: ' + str(getStudentID))
+            else:
+                studentMatch = result[0][0] + ' ' + result[0][1]
+                print(studentMatch)
    
     # author: Naomi
     # printing instructor schedule
     def printInstructorSchedule(self, username, upassword):
         c = database.cursor()
+        term = input("Enter the semester you would like to search in: ")
+        yr = input("Enter the year of the semester you would like to search in: ")    
 
         #getting first and last name of instructor
-        c.execute("""SELECT FirstName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
+        c.execute("""SELECT FirstName, LastName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
         fName = c.fetchall()
         for i in fName:
             FName = i[0]
-
-        c.execute("""SELECT LastName FROM Instructor WHERE Password = '""" + upassword + """' AND Email = '""" + username + """';""")
-        lName = c.fetchall()
-        for i in lName:
-            LName = i[0]
+            LName = i[1]
 
         fullName = FName + " " + LName
 
         #getting courses where instructor matches first and last name of instructor
-        c.execute("""SELECT Title from Course WHERE Instructor ='""" + fullName + """';""")
+        c.execute("""SELECT Title, Times, DaysOfWeek from Course WHERE Instructor ='""" + fullName + """' AND Semester = '""" + term + """' AND Year = '""" + yr + """';""")
         qr = c.fetchall()
         c.close()
-
-        if (qr is not None):
-            print("\nYou are not teaching any courses at the moment.\n")
+        if not qr:
+            print("\nYou do not have a schedule at the moment with the entered criterias. Please try again.")
         else:
-            print("Here is your schedule: \n")
+            print("\nHere is your " + term + " " + yr + " schedule: ")
             for i in qr:
-                print(i[0])
+                print(i[0] + "    " + i[2] + "    " + i[1])
+
+            
 
     # author: Sterling
     # instructor menu function
@@ -289,7 +404,7 @@ class Instructor(User):
         choice=""
 
         while 1:
-            choice = input("Welcome to the CURSE registration system.\n1. Search courses\n2. View/print schedule\n3. Print roster\n4. Logout\nEnter choice : ")
+            choice = input("\nWelcome to the CURSE registration system.\n1. Search courses\n2. View/print schedule\n3. Print roster\n4. Logout\nEnter choice : ")
             if choice == '1': 
                 print("Searching courses.")
                 self.searchCourses()
@@ -581,7 +696,7 @@ class Admin(User):
                 m = input("Enter the student's major: ")
                 sPassword = input("Enter the student's password: ")
 
-                c.execute("""INSERT INTO STUDENT VALUES(""" + sID + """,'""" + sFirstName + """','""" + sLastName + """',""" + gYear + """,'""" + m + """','""" + sEmail + """','""" + sPassword + """',  NULL);""") 
+                c.execute("""INSERT INTO STUDENT VALUES(""" + sID + """,'""" + sFirstName + """','""" + sLastName + """',""" + gYear + """,'""" + m + """','""" + sEmail + """','""" + sPassword + """');""") 
                 print("\nStudent has been added!\n")
                 c.close()
 
@@ -604,7 +719,7 @@ class Admin(User):
                 dept = input("Enter the department the instructor belongs to: ")
                 iPassword = input("Enter the instructor's password: ")
 
-                c.execute("""INSERT INTO INSTRUCTOR VALUES(""" + iID + """,'""" + iFirstName + """','""" + iLastName + """','""" + title + """','""" + dept + """','""" + iEmail + """','""" + iPassword + """',  NULL);""")
+                c.execute("""INSERT INTO INSTRUCTOR VALUES(""" + iID + """,'""" + iFirstName + """','""" + iLastName + """','""" + title + """','""" + dept + """','""" + iEmail + """','""" + iPassword + """');""")
                 print("\nInstructor has been added!\n")
                 c.close()
         else: 
@@ -719,154 +834,3 @@ def login():
 def logout():
     print(" \nYou have successfully logged out. \nFor security reasons, exit your web browser.")
     sys.exit()
-
-###############################################
-################### warning ###################
-###### you have entered the shadow realm ######
-###############################################
-
-    # # add courses to student schedule
-    # # author: Chandler Berry
-    # def addCourse(self, studentID, studentEmail):
-
-    #     # prompt user to enter CRN
-    #     getCRN = input('enter CRN of course you want to add: ')
-
-    #     # get ID of student adding the course to their schedule
-    #     c = database.cursor()
-    #     getStudentID = 'SELECT Student.ID FROM Student WHERE Student.Email = \'' + studentEmail + '\''
-    #     c.execute(getStudentID)
-    #     studentResult = list(c.fetchall())
-    #     c.close()
-
-    #     # get initial student schedule
-    #     c = database.cursor()
-    #     getSched = 'SELECT Student.Schedule FROM Student WHERE Student.ID = ' + studentID
-    #     c.execute(getSched)
-    #     schedule = list(c.fetchall())
-    #     c.close()
-
-    #     # get initial course roster
-    #     c = database.cursor()
-    #     getRoster = 'SELECT Course.Roster FROM Course WHERE Course.CRN = ' + getCRN
-    #     c.execute(getRoster)
-    #     roster = list(c.fetchall())
-    #     c.close()
-
-    #     # add student ID to course roster in Course table
-    #     newRoster = ''
-    #     for row in roster:
-    #         if row[0] == None:
-    #             for value in studentResult:
-    #                 newRoster = value[0]
-    #         elif row[0] != None:
-    #             for value in studentResult:
-    #                 newRoster = str(row[0]) + '-' + str(value[0])
-    #     c = database.cursor()
-    #     updateRoster = 'UPDATE Course SET Roster = \'' + str(newRoster) + '\' WHERE Course.CRN = ' + str(getCRN)
-    #     c.execute(updateRoster)
-    #     c.close()
-
-    #     # add course to student schedule
-    #     newSchedule = ''
-    #     for row in schedule:
-    #         if row[0] == None:
-    #             for value in studentResult:
-    #                 newSchedule = str(getCRN)
-    #         elif row[0] != None:
-    #             for value in studentResult:
-    #                 newSchedule = str(row[0]) + '-' + str(getCRN)
-    #     c = database.cursor()
-    #     updateSched = 'UPDATE Student SET Schedule = \'' + newSchedule + '\' WHERE Student.ID = ' + studentID
-    #     c.execute(updateSched)
-    #     print('\nCourse Added to Schedule\n')
-    #     c.close()
-        
-    #     # commit changes to db
-    #     database.commit()
-
-    # # remove courses from student schedule
-    # # author: Chandler Berry
-    # def rmCourse(self, studentID, studentEmail):
-
-    #     # prompt user to enter CRN
-    #     getCRN = input('enter CRN of course you want to remove: ')
-
-    #     # get ID of student removing the course from their schedule
-    #     c = database.cursor()
-    #     getStudentID = 'SELECT Student.ID FROM Student WHERE Student.Email = \'' + studentEmail + '\''
-    #     c.execute(getStudentID)
-    #     studentResult = list(c.fetchall())
-
-    #     # get initial student schedule
-    #     c = database.cursor()
-    #     getSched = 'SELECT Student.Schedule FROM Student WHERE Student.ID = ' + studentID
-    #     c.execute(getSched)
-    #     schedule = list(c.fetchall())
-    #     c.close()
-
-    #     # get initial course roster
-    #     c = database.cursor()
-    #     getRoster = 'SELECT Course.Roster FROM Course WHERE Course.CRN = ' + getCRN
-    #     c.execute(getRoster)
-    #     roster = list(c.fetchall())
-    #     c.close()
-
-    #     # remove student ID from course roster in Course table
-    #     newRoster = ''
-    #     for row in roster:
-    #         if row[0] == None:
-    #             print('you aren\'t registered in this course')
-    #         elif row[0] != None:
-    #             findID = ''
-    #             for value in studentResult:
-    #                 findID = row[0]
-    #                 if str(value[0]) in findID:
-    #                     newRoster = findID
-    #                     if '-' in newRoster:
-    #                         rosterList = newRoster.split('-')
-    #                         rosterList.remove(str(value[0]))
-    #                         s = '-'
-    #                         newRoster = s.join(rosterList)
-    #                     else:
-    #                         newRoster = ''
-    #                 else:
-    #                     print('you aren\'t registered in this course')
-    #     c = database.cursor()
-    #     # quick fix for preventing an empty space from being input into the Course table, this was causing a couple issues that can be nipped in the bud right here.
-    #     updateRoster = 'UPDATE Course SET Roster = \'' + newRoster + '\' WHERE Course.CRN = ' + getCRN
-    #     if not newRoster:
-    #         updateRoster = 'UPDATE Course SET Roster = NULL WHERE Course.CRN = ' + getCRN
-    #     c.execute(updateRoster)
-    #     c.close()
-
-    #     # remove course from student schedule
-    #     newSched = ''
-    #     for row in schedule:
-    #         if row[0] == None:
-    #             print('you aren\'t registered in this course')
-    #         elif row[0] != None:
-    #             findCRN = ''
-    #             for value in schedule:
-    #                 findCRN = row[0]
-    #                 if str(value[0]) in findCRN:
-    #                     newSched = findCRN
-    #                     if '-' in newRoster:
-    #                         schedList = newSched.split('-')
-    #                         schedList.remove(str(value[0]))
-    #                         s = '-'
-    #                         newSched = s.join(schedList)
-    #                     else:
-    #                         newSched = ''
-    #                 else:
-    #                     print('you aren\'t registered in this course')
-    #     c = database.cursor()
-    #     updateSched = 'UPDATE Student SET Schedule = \'' + newSched + '\' WHERE Student.ID = ' + studentID
-    #     if not newSched:
-    #         updateSched = 'UPDATE Student SET Schedule = NULL WHERE Student.ID = ' + studentID
-    #     c.execute(updateSched)
-    #     print('\nCourse Removed from Schedule\n')
-    #     c.close()
-        
-    #     # commit changes to db
-    #     database.commit()
