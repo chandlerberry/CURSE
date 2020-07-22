@@ -401,7 +401,7 @@ class Instructor(User):
         choice=""
 
         while 1:
-            choice = input("\nWelcome to the CURSE registration system.\n1. Search courses\n2. View/print schedule\n3. Print roster\n4. Logout\nEnter choice : ")
+            choice = input("\nWelcome to the CURSE registration system.\n1. Search courses\n2. View/print schedule\n3. Print roster\n4. Search roster\n5. Logout\nEnter choice : ")
             if choice == '1': 
                 print("Searching courses.")
                 self.searchCourses()
@@ -410,6 +410,8 @@ class Instructor(User):
             elif choice == '3': 
                 self.printRoster()
             elif choice == '4':
+                self.searchRoster()
+            elif choice == '5':
                 print("Logging out...")
                 logout()
             else:
