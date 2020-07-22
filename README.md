@@ -25,7 +25,7 @@ A class registration system designed in Applied Programming Concepts
 ## Division of Labor:
 
 ### Chandler:
-- Check conflicts in course schedule -> WIP
+- Check conflicts in course schedule -> DONE
 - Print student schedule -> DONE
 - Search Roster -> DONE
 
