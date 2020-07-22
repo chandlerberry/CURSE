@@ -55,4 +55,24 @@ print('Darth Vader added to database')
 db.commit()
 
 # courses
+print('-----\nCOURSES\n-----')
+filePath = 'G:\\gitrepos\\CURSE\\courses.xlsx'
+course = openpyxl.load_workbook(filePath)
+courses = course.active
+maxRow = courses.max_row
+maxCol = courses.max_column
+getCourse = []
+for i in range(1, maxRow + 1):
+    getCourse = []
+    for j in range(1, maxCol + 1):
+        getCell = courses.cell(row = i, column = j)
+        getCourse.append(getCell.value)
+    insertInstructor = 'INSERT INTO Course VALUES (' + str(getCourse[0]) + ', \'' + getCourse[1] + '\', \'' + getCourse[2] + '\', \'' + getCourse[3] + '\', \'' + getCourse[4] + '\', \'' + getCourse[5] + '\', \'' + getCourse[6] + '\', \'' + str(getCourse[7]) + '\', \'' + str(getCourse[8]) + '\');'
+    c = db.cursor()
+    c.execute(insertInstructor)
+    print(getCourse[1] + ' added to database')
+    c.close()
+    db.commit()
+
+
 print('to be continued.......')
