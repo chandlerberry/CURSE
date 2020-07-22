@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2020-06-25T22:07:22.020Z" agent="5.0 (Windows)" etag="GM8BgwCEHfy1h9HFv1cL" version="13.3.4" type="github">
+<mxfile host="app.diagrams.net" modified="2020-07-22T00:16:39.864Z" agent="5.0 (Windows)" etag="kMlhdmQa2ME3OgfGN60Z" version="13.4.9" type="github">
   <diagram id="UPm1YwOWUhs9PoYvbO52" name="Page-1">
-    <mxGraphModel dx="1673" dy="942" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="788" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -52,16 +52,16 @@
         <mxCell id="OSFX77Gv0Drbep74xwIW-14" value="SQL Database" style="shape=umlActor;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;html=1;" parent="1" vertex="1">
           <mxGeometry x="380" y="120" width="30" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="OSFX77Gv0Drbep74xwIW-15" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="OSFX77Gv0Drbep74xwIW-5" target="OSFX77Gv0Drbep74xwIW-14" edge="1">
+        <mxCell id="OSFX77Gv0Drbep74xwIW-15" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="OSFX77Gv0Drbep74xwIW-5" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="280" y="140" as="sourcePoint" />
-            <mxPoint x="330" y="90" as="targetPoint" />
+            <mxPoint x="360" y="148" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="OSFX77Gv0Drbep74xwIW-16" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="OSFX77Gv0Drbep74xwIW-25" target="OSFX77Gv0Drbep74xwIW-14" edge="1">
+        <mxCell id="OSFX77Gv0Drbep74xwIW-16" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="OSFX77Gv0Drbep74xwIW-25" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="240" y="270" as="sourcePoint" />
-            <mxPoint x="380" y="270" as="targetPoint" />
+            <mxPoint x="360" y="200" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="OSFX77Gv0Drbep74xwIW-17" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="OSFX77Gv0Drbep74xwIW-6" edge="1">
@@ -79,7 +79,7 @@
         <mxCell id="OSFX77Gv0Drbep74xwIW-20" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="OSFX77Gv0Drbep74xwIW-8" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="400" y="90" as="sourcePoint" />
-            <mxPoint x="370" y="150" as="targetPoint" />
+            <mxPoint x="360" y="140" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="OSFX77Gv0Drbep74xwIW-21" value="Remove course system" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -98,7 +98,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="OSFX77Gv0Drbep74xwIW-25" value="Link/unlink" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="160" y="280" width="80" height="50" as="geometry" />
+          <mxGeometry x="160" y="330" width="80" height="50" as="geometry" />
         </mxCell>
         <mxCell id="OSFX77Gv0Drbep74xwIW-26" value="&lt;p style=&quot;margin: 0px ; margin-top: 4px ; text-align: center ; text-decoration: underline&quot;&gt;&lt;b&gt;Login&lt;/b&gt;&lt;br&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Actors &lt;/b&gt;= Admin, SQL Database&lt;br&gt;&lt;b&gt;Description &lt;/b&gt;= Allows admin to gain access to CURSE using their &lt;br&gt;credentials and utilize other available functions&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Data &lt;/b&gt;= Username, password, permission level&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Stimulus &lt;/b&gt;= Typing info into text boxes, clicking Login button&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Response &lt;/b&gt;= User&#39;s credentials are confirmed with &lt;br&gt;database and user is either granted or denied access&lt;br&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;" parent="1" vertex="1">
           <mxGeometry x="20" y="400" width="380" height="185" as="geometry" />
@@ -117,6 +117,27 @@
         </mxCell>
         <mxCell id="OSFX77Gv0Drbep74xwIW-31" value="&lt;p style=&quot;margin: 0px ; margin-top: 4px ; text-align: center ; text-decoration: underline&quot;&gt;&lt;b&gt;Add student/instructor&lt;/b&gt;&lt;br&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Actors &lt;/b&gt;= Admin, SQL Database&lt;br&gt;&lt;b&gt;Description &lt;/b&gt;= Adds a new student or instructor to the user &lt;br&gt;database &lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Data &lt;/b&gt;= First name, last name, WID#, permission level&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Stimulus &lt;/b&gt;= Clicking Add User button&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Response &lt;/b&gt;= Admin confirms new user info and the database is&lt;br&gt;updated&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;" parent="1" vertex="1">
           <mxGeometry x="450" y="410" width="370" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="f9xc22tMQSOGh1_FFSRE-1" value="&lt;p style=&quot;margin: 0px ; margin-top: 4px ; text-align: center ; text-decoration: underline&quot;&gt;&lt;b&gt;Add course to system&lt;/b&gt;&lt;br&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Actors &lt;/b&gt;= Admin, SQL Database&lt;br&gt;&lt;b&gt;Description &lt;/b&gt;= Allows admin to add a course to the registration&lt;br&gt;system so students and instructors can become linked to it&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Data &lt;/b&gt;= CRN, title, semester, year, dept, time, days of week, credits&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Stimulus &lt;/b&gt;= Clicking Add Course to System button&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Response &lt;/b&gt;= Admin confirms addition of course information&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;and database is updated&lt;br&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="610" width="370" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="f9xc22tMQSOGh1_FFSRE-2" value="&lt;p style=&quot;margin: 0px ; margin-top: 4px ; text-align: center ; text-decoration: underline&quot;&gt;&lt;b&gt;Search Courses&lt;/b&gt;&lt;br&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Actors &lt;/b&gt;= Admin, SQL Database&lt;br&gt;&lt;b&gt;Description &lt;/b&gt;= Shows admin matching courses when given &lt;br&gt;search parameters such as time slot, department, title, etc.&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Data &lt;/b&gt;= CRN, time slot, day, instructor, department, semester, year&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Stimulus &lt;/b&gt;= Clicking Search Courses then typing in preferences&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px ; margin-left: 8px&quot;&gt;&lt;b&gt;Response &lt;/b&gt;= Contacts database and either shows courses that&lt;br&gt;match the criteria or shows that none have been found&lt;br&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="830" width="370" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="f9xc22tMQSOGh1_FFSRE-3" value="Search Courses" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="277.5" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="f9xc22tMQSOGh1_FFSRE-4" value="" style="endArrow=classic;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="f9xc22tMQSOGh1_FFSRE-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="40" y="180" as="sourcePoint" />
+            <mxPoint x="150" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="f9xc22tMQSOGh1_FFSRE-5" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="f9xc22tMQSOGh1_FFSRE-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="320" y="290" as="sourcePoint" />
+            <mxPoint x="360" y="180" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
