@@ -25,6 +25,7 @@ A class registration system designed in Applied Programming Concepts
 ## Division of Labor:
 
 ### Chandler:
+- Add/Remove courses from student schedule
 - Check conflicts in course schedule
 - Print student schedule
 - Print/Search Roster
