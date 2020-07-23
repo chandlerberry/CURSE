@@ -25,13 +25,18 @@ A class registration system designed in Applied Programming Concepts
 ## Division of Labor:
 
 ### Chandler:
-- Check conflicts in course schedule -> DONE
-- Print student schedule -> DONE
-- Search Roster -> DONE
+- Check conflicts in course schedule
+- Print student schedule
+- Print/Search Roster
+- Database
 
 ### Naomi:
+- Log in/out
+- Search Courses
 - Create Instructor/Student
 - Print instructor course schedule
 
 ### Sterling:
 - Link/Unlink instructor/student from course
+- User Menus
+- Add/Remove Courses from the system
