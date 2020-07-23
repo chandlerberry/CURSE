@@ -245,25 +245,22 @@ class Student(User):
     def rmCourse(self, studentID):
         # prompt user to enter CRN
         getCRN = input('Enter CRN of course you want to remove: ')
-        # check if student is actually in the class they are trying to remove
         c = database.cursor()
-        checkSchedMapping = 'SELECT StudentID FROM Schedule_Mapping WHERE StudentID = ' + str(studentID) + ' AND CourseID = ' + str(getCRN)
+        checkSchedMapping = 'SELECT StudentID, CourseID FROM Schedule_Mapping WHERE StudentID = ' + str(studentID) + ' AND CourseID = ' + str(getCRN)
         c.execute(checkSchedMapping)
         result = c.fetchone()
+        print(result)
         c.close()
-        if not result:
-            print('You are not registered in this course.')
+        if str(result[0]) == studentID and str(result[1]) == getCRN:
+            # remove the tuple from the db that indicates this student is registered in this course
+            deleteTuple = 'DELETE FROM Schedule_Mapping WHERE StudentID = ' + str(studentID) + ' AND CourseID = ' + str(getCRN)
+            c = database.cursor()
+            c.execute(deleteTuple)
+            c.close()
+            database.commit()
+            print('The course has been removed from your schedule.')
         else:
-            if result[0] == studentID:
-                # remove the tuple from the db that indicates this student is registered in this course
-                deleteTuple = 'DELETE FROM Schedule_Mapping WHERE StudentID = ' + str(studentID) + ' AND CourseID = ' + str(getCRN)
-                c = database.cursor()
-                c.execute(deleteTuple)
-                c.close()
-                database.commit()
-                print('The course has been removed from your schedule.')
-            else:
-                pass
+            print('You are not registered in this course.')
 
     # print student's schedule provided with the year and semester
     # author: Chandler Berry
@@ -289,7 +286,7 @@ class Student(User):
         choice=""
 
         while 1:
-            choice = input("\nWelcome to the CURSE registration system.\n1. Add a course\n2. Drop a course\n3. Search courses\n4. View/print schedule\n5. Check conflicts\n6. Logout\nEnter choice : ")
+            choice = input("\nWelcome to the CURSE registration system.\n1. Add a course\n2. Drop a course\n3. Search courses\n4. View/print schedule\n5. Logout\nEnter choice : ")
             if choice == '1':
                 print("Add a course to your schedule.")
                 self.addCourse(sID)
