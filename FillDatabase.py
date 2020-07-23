@@ -73,6 +73,3 @@ for i in range(1, maxRow + 1):
     print(getCourse[1] + ' added to database')
     c.close()
     db.commit()
-
-
-print('to be continued.......')
