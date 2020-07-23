@@ -206,7 +206,7 @@ class Student(User):
     # constructor
     def __init__(self, firstName, lastName, ID):
         super().__init__(firstName, lastName, ID)
-        print('Student {} {} [{}] created'.format(self.firstName, self.lastName, self.ID))
+        print('Student {} {} [{}] HAS BEEN CURSED'.format(self.firstName, self.lastName, self.ID))
 
     # add courses to student schedule
     # author: Chandler Berry
@@ -314,7 +314,7 @@ class Instructor(User):
     # constructor
     def __init__(self, firstName, lastName, ID):
         super().__init__(firstName, lastName, ID)
-        print('Instructor {} {} [{}] created'.format(self.firstName, self.lastName, self.ID))
+        print('Instructor {} {} [{}] HAS BEEN CURSED'.format(self.firstName, self.lastName, self.ID))
 
     # print course roster for instructor
     # author: Chandler Berry
@@ -422,7 +422,7 @@ class Admin(User):
     # constructor
     def __init__(self, firstName, lastName, ID):
         super().__init__(firstName, lastName, ID)
-        print('Admin {} {} [{}] created'.format(self.firstName, self.lastName, self.ID)) 
+        print('Admin {} {} [{}] HAS BEEN CURSED'.format(self.firstName, self.lastName, self.ID)) 
 
     # author: Sterling
     # add courses to system function
