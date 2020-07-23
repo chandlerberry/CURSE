@@ -73,3 +73,20 @@ for i in range(1, maxRow + 1):
     print(getCourse[1] + ' added to database')
     c.close()
     db.commit()
+
+
+fuckthis = db.cursor()
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31799, 10011)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31406, 10011)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31047, 10011)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31044, 10011)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31799, 10010)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31799, 10001)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31799, 10067)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31799, 10035)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31799, 10090)')
+fuckthis.execute('INSERT INTO Schedule_Mapping VALUES (31799, 10023)')
+fuckthis.close()
+db.commit()
+
+db.close()
